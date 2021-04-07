@@ -3,8 +3,8 @@ package ru.luxoft.cources.calc;
 import java.util.Scanner;
 
 public class Calculator {
-    static int num1 = 0;
-    static int num2 = 0;
+    static double num1 = 0;
+    static double num2 = 0;
     static String operator = "";
     static double result = 0;
     static String userInput = null;
@@ -17,7 +17,6 @@ public class Calculator {
                 System.out.println(result);
             } catch (IllegalArgumentException ex) {
                 System.out.println("Wrong input!");
-                continue;
             }
         }
     }
@@ -34,7 +33,7 @@ public class Calculator {
         return calculate(num1, operator, num2);
     }
 
-    public static int calculate(int num1, String operator, int num2) throws IllegalArgumentException {
+    public static double calculate(double num1, String operator, double num2) throws IllegalArgumentException {
         switch (operator) {
             case "+":
                 return num1 + num2;
@@ -55,9 +54,9 @@ public class Calculator {
         }
     }
 
-    private static int fact(int num) {
+    private static int fact(double num) {
         int res = 1;
-        for (int i = 1; i <= num; i++) {
+        for (int i = 1; i <= (int) num; i++) {
             res *= i;
         }
         return res;
