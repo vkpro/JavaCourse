@@ -16,11 +16,6 @@ public class DebetScore extends Score {
     }
 
     @Override
-    public Money getMoney(double balanceLess) {
-        return super.getMoney(balanceLess);
-    }
-
-    @Override
     public void addMoney(Money money) {
         if (creditScore.getBalance().getValue() < 20000) {
             super.addMoney(money);

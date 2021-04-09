@@ -14,11 +14,6 @@ public class CurrentScore extends Score{
     }
 
     @Override
-    public Money getMoney(double balanceLess) {
-        return super.getMoney(balanceLess);
-    }
-
-    @Override
     public void addMoney(Money money) {
         if (money.getValue() > 1000000){
             Money moneyWithBonus = new Money(money.getCurrency(), money.getValue() + 2000);

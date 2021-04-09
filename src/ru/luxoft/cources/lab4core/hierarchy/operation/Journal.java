@@ -8,7 +8,7 @@ public class Journal {
 
 
     public Journal() {
-        operations = new ArrayList<Operation>();
+        operations = new ArrayList<>();
     }
 
     public void setOperations(List<Operation> operations) {

@@ -10,12 +10,6 @@ public class CreditScore extends Score {
     }
 
     @Override
-    public Money getMoney(double balanceLess) {
-        return super.getMoney(balanceLess);
-    }
-
-
-    @Override
     protected boolean checkBefore() {
         return true;
     }
