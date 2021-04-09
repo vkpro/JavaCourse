@@ -6,34 +6,38 @@ public class Calculator {
     static double num1 = 0;
     static double num2 = 0;
     static String operator = "";
-    static double result = 0;
-    static String userInput = null;
-    static Scanner scanner = new Scanner(System.in);
+    static final Scanner SCANNER = new Scanner(System.in);
 
     public static void main(String[] args) {
-        while (!"q".equals(userInput)) {
+        boolean isExit = false;
+        while (!isExit) {
             try {
-                result = getCalcResult();
-                System.out.println(result);
+                System.out.println(getCalcResult());
             } catch (IllegalArgumentException ex) {
                 System.out.println("Wrong input!");
+            } catch (ExitException ex) {
+                System.out.println("Exit!");
+                isExit = true;
             }
         }
     }
 
     private static String getUserInput() {
-        userInput = scanner.nextLine();
-        return userInput;
+        return SCANNER.nextLine();
     }
 
-    private static double getCalcResult() throws IllegalArgumentException {
-        num1 = Integer.parseInt(getUserInput());
+    private static double getCalcResult() {
+        String userInput = getUserInput();
+        if ("q".equals(userInput)) {
+            throw new ExitException();
+        }
+        num1 = Integer.parseInt(userInput);
         num2 = Integer.parseInt(getUserInput());
         operator = getUserInput();
-        return calculate(num1, operator, num2);
+        return calculate();
     }
 
-    public static double calculate(double num1, String operator, double num2) throws IllegalArgumentException {
+    public static double calculate() {
         switch (operator) {
             case "+":
                 return num1 + num2;
@@ -61,4 +65,7 @@ public class Calculator {
         }
         return res;
     }
+}
+
+class ExitException extends RuntimeException {
 }
