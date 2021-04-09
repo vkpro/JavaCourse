@@ -1,35 +1,46 @@
 package ru.luxoft.cources.calc;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Calculator {
     static double num1 = 0;
     static double num2 = 0;
     static String operator = "";
-    static double result = 0;
-    static String userInput = null;
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        while (!"q".equals(userInput)) {
+        while (true) {
             try {
-                result = getCalcResult();
-                System.out.println(result);
+                Double result = getCalcResult();
+                if (result != null) {
+                    System.out.format("%.1f %s %.1f = %.1f\n", num1, operator, num2, result);
+                } else {
+                    break;
+                }
             } catch (IllegalArgumentException ex) {
-                System.out.println("Wrong input!");
+                System.out.println("Wrong input! Use `<num1> <+,-,*,/,!> <num2>`");
             }
         }
     }
 
-    private static String getUserInput() {
-        userInput = scanner.nextLine();
-        return userInput;
-    }
+    private static Double getCalcResult() throws IllegalArgumentException {
+        String inputString = scanner.nextLine();
 
-    private static double getCalcResult() throws IllegalArgumentException {
-        num1 = Integer.parseInt(getUserInput());
-        num2 = Integer.parseInt(getUserInput());
-        operator = getUserInput();
+        if ("q".equals(inputString.trim())) return null;
+        List<String> inputParams = Arrays.asList(inputString.split(" "));
+
+        if (inputParams.size() >= 3) {
+            num1 = Integer.parseInt(inputParams.get(0));
+            operator = inputParams.get(1);
+            num2 = Integer.parseInt(inputParams.get(2));
+        } else if (inputParams.size() >= 2) {
+            num1 = Integer.parseInt(inputParams.get(0));
+            operator = inputParams.get(1);
+        } else {
+            throw new IllegalArgumentException();
+        }
         return calculate(num1, operator, num2);
     }
 
