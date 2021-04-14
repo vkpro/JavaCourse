@@ -1,12 +1,16 @@
 package ru.luxoft.cources.lab8core;
 
-public class HashMapImpl {
+import java.util.Objects;
+import java.util.function.Predicate;
+
+public class HashMapImpl<K, V> {
     private final int capacity = 100;
     private int size = 0;
-    private Entry table[] = new Entry[capacity];
+    private Entry<K, V>[] buckets = new Entry[capacity];
+    private Entry<K, V> nullBucket = null;
 
     public static void main(String[] args) {
-        HashMapImpl myHashMap = new HashMapImpl();
+        HashMapImpl<Integer, String> myHashMap = new HashMapImpl<>();
         myHashMap.put(1, "A");
         myHashMap.put(2, "B");
         myHashMap.put(3, "C");
@@ -14,16 +18,27 @@ public class HashMapImpl {
         System.out.println("Value of key 1: " + myHashMap.get(1));
         System.out.println("Value of key 2: " + myHashMap.get(2));
         System.out.println("Value of key 3: " + myHashMap.get(3));
+        System.out.println("Value of key 4: " + myHashMap.get(4));
+        System.out.println("Value of key null: " + myHashMap.get(null));
+        myHashMap.put(null, "<null>");
+        System.out.println("Value of key null: " + myHashMap.get(null));
+        System.out.println("HashMap size: " + myHashMap.size());
+
+        System.out.println("Old val " + myHashMap.remove(2));
+        System.out.println("Old val " + myHashMap.remove(2));
+        System.out.println("Old val " + myHashMap.remove(null));
+        System.out.println("Old val " + myHashMap.remove(null));
+        System.out.println("HashMap size: " + myHashMap.size());
+
     }
 
-    private int Hashing(int hashCode) {
+    private int hashing(int hashCode) {
         int location = hashCode % capacity;
         System.out.println("Location:" + location);
         return location;
     }
 
     public int size() {
-        // TODO Auto-generated method stub
         return this.size;
     }
 
@@ -31,118 +46,156 @@ public class HashMapImpl {
         return this.size == 0;
     }
 
-    public boolean containsKey(Object key) {
+    public boolean containsKey(K key) {
         if (key == null) {
-            if (table[0].getKey() == null) {
-                return true;
-            }
+            return nullBucket != null;
         }
-        int location = Hashing(key.hashCode());
-        Entry e = null;
-        try {
-            e = table[location];
-        } catch (NullPointerException ex) {
-
-        }
-        return e != null && e.getKey() == key;
+        return getEntryByKeyFromBucket(key) != null;
     }
 
-    public boolean containsValue(Object value) {
-        for (int i = 0; i < table.length; i++) {
-            if (table[i] != null && table[i].getVal() == value) {
+    private Entry<K, V> getEntryFromBucketByCondition(K key, Predicate<Entry<K, V>> predicate) {
+        if (key == null) {
+            if (nullBucket == null) {
+                return null;
+            } else {
+                return predicate.test(nullBucket) ? nullBucket : null;
+            }
+        }
+
+        int location = hashing(key.hashCode());
+        Entry<K, V> entry = buckets[location];
+        while (entry != null && !predicate.test(entry)) {
+            entry = entry.getNext();
+        }
+        return entry;
+    }
+
+    private Entry<K, V> getEntryByKeyFromBucket(K key) {
+        int location = hashing(key.hashCode());
+        Entry<K, V> element = buckets[location];
+        while (element != null && !element.getKey().equals(key)) {
+            element = element.getNext();
+        }
+        return element;
+    }
+
+    private Entry<K, V> getEntryParentByKeyFromBucket(K key) {
+        int location = hashing(key.hashCode());
+        Entry<K, V> element = buckets[location];
+        if (element == null || element.getNext() == null) {
+            return null;
+        } else {
+            while (element.getNext() != null && !element.getNext().getKey().equals(key)) {
+                element = element.getNext();
+            }
+        }
+        return element;
+    }
+
+    public boolean containsValue(V value) {
+        for (int i = 0; i < buckets.length; i++) {
+            if (isValueInBucket(i, value)) {
                 return true;
             }
         }
         return false;
     }
 
-    public Object get(Object key) {
-        Object ret = null;
-        if (key == null) {
-            Entry e = null;
-            try {
-                e = table[0];
-            } catch (NullPointerException ex) {
-
-            }
-            if (e != null) {
-                return e.getVal();
-            }
-        } else {
-            int location = Hashing(key.hashCode());
-            Entry e = null;
-            try {
-                e = table[location];
-            } catch (NullPointerException ex) {
-
-            }
-            if (e != null && e.getKey() == key) {
-                return e.getVal();
+    private boolean isValueInBucket(int location, V value) {
+        Entry<K, V> element = buckets[location];
+        while (element != null) {
+            if (Objects.equals(value, element.getValue())) {
+                return true;
+            } else {
+                element = element.getNext();
             }
         }
-        return ret;
+        return false;
     }
 
-    public Object put(Object key, Object val) {
-        Object ret = null;
+    public V get(K key) {
         if (key == null) {
-            ret = putForNullKey(val);
-            return ret;
+            return nullBucket == null ? null : nullBucket.getValue();
         } else {
-            int location = Hashing(key.hashCode());
-            if (location >= capacity) {
-                System.out.println("Rehashing required");
+            Entry<K, V> entry = getEntryByKeyFromBucket(key);
+            return entry == null ? null : entry.getValue();
+        }
+    }
+
+    public V put(K key, V value) {
+        if (size >= capacity) {
+            System.out.println("Rehashing required");
+            return null;
+        }
+
+        if (key == null) {
+            if (nullBucket == null) {
+                nullBucket = new Entry<>(null, value);
+                size++;
+                return null;
+            } else {
+                return nullBucket.setValueAndReturnOld(value);
+            }
+        } else {
+            Entry<K, V> entry = getEntryByKeyFromBucket(key);
+            if (entry == null) {
+                int location = hashing(key.hashCode());
+                size++;
+                entry = getLastElementInBucket(location);
+                Entry<K, V> newEntry = new Entry<>(key, value);
+
+                if (entry == null) {
+                    buckets[location] = newEntry;
+                } else {
+                    entry.setNext(newEntry);
+                }
+                return null;
+            } else {
+                return entry.setValueAndReturnOld(value);
+            }
+        }
+    }
+
+    private Entry<K, V> getLastElementInBucket(int location) {
+        if (buckets[location] == null) {
+            return null;
+        } else {
+            Entry<K, V> element = buckets[location];
+            while (element.getNext() != null) {
+                element = element.getNext();
+            }
+            return element;
+        }
+    }
+
+    public V remove(K key) {
+        if (key == null) {
+            if (nullBucket != null) {
+                V retValue = nullBucket.getValue();
+                nullBucket = null;
+                size--;
+                return retValue;
+            } else {
                 return null;
             }
-            Entry e = null;
-            try {
-                e = table[location];
-            } catch (NullPointerException ex) {
+        }
 
-            }
-            if (e != null && e.getKey() == key) {
-                ret = e.getVal();
+        int location = hashing(key.hashCode());
+        Entry<K, V> entry = getEntryParentByKeyFromBucket(key);
+        if (entry == null) {
+            if (buckets[location] != null && buckets[location].getKey().equals(key)) {
+                V retValue = buckets[location].getValue();
+                buckets[location] = buckets[location].getNext();
+                size--;
+                return retValue;
             } else {
-                Entry eNew = new Entry();
-                eNew.setKey(key);
-                eNew.setVal(val);
-                table[location] = eNew;
-                size++;
+                return null;
             }
-        }
-        return ret;
-    }
-
-    private Object putForNullKey(Object val) {
-        Entry e = null;
-        try {
-            e = table[0];
-        } catch (NullPointerException ex) {
-
-        }
-        Object ret = null;
-        if (e != null && e.getKey() == null) {
-            ret = e.getVal();
-            e.setVal(val);
-            return ret;
         } else {
-            Entry eNew = new Entry();
-            eNew.setKey(null);
-            eNew.setVal(val);
-            table[0] = eNew;
-            size++;
+            V retValue = entry.getNext().getValue();
+            entry.setNext(entry.getNext().getNext());
+            size--;
+            return retValue;
         }
-        return ret;
-    }
-
-    public Object remove(Object key) {
-        int location = Hashing(key.hashCode());
-        Object ret = null;
-        if (table[location].getKey() == key) {
-            for (int i = location; i < table.length; i++) {
-                table[i] = table[i + 1];
-            }
-        }
-        return ret;
     }
 }

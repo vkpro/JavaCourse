@@ -1,23 +1,35 @@
 package ru.luxoft.cources.lab8core;
 
 public class Entry<K, V> {
-    Object key;
-    Object val;
+    K key;
+    V val;
+    Entry<K, V> next;
 
-    public void setKey(Object key) {
+    public Entry(K key, V val) {
         this.key = key;
-    }
-
-    public void setVal(Object val) {
         this.val = val;
     }
 
-    public Object getKey() {
+    public V setValueAndReturnOld(V val) {
+        V tmp = this.val;
+        this.val = val;
+        return tmp;
+    }
+
+    public K getKey() {
         return key;
     }
 
-    public Object getVal() {
+    public V getValue() {
         return val;
+    }
+
+    public Entry<K, V> getNext() {
+        return next;
+    }
+
+    public void setNext(Entry<K, V> next) {
+        this.next = next;
     }
 
     @Override
@@ -25,25 +37,18 @@ public class Entry<K, V> {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass().getName() != o.getClass().getName()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        Entry e = (Entry) o;
-        if (this.key == e.key) {
-            return true;
-        }
-        return false;
+        Entry<?, ?> e = (Entry<?, ?>) o;
+        return this.key == e.key;
     }
 
     @Override
     public int hashCode() {
         int prime = 13;
         int mul = 11;
-        if (key != null) {
-            int hashCode = prime * mul + key.hashCode();
-            return hashCode;
-        }
-        return 0;
+        return key == null ? 0 : prime * mul + key.hashCode();
     }
 
 

@@ -1,7 +1,7 @@
 package ru.luxoft.cources.lab6core;
 
-import java.util.Scanner;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -22,7 +22,7 @@ public class Main {
     private static void displayProductsStatistic(TreeSet<Product> productList) {
         System.out.println(productList);
         System.out.println(getProductsSum(productList));
-        System.out.println(getTopProducts(productList));
+        System.out.println(getTopThreeProducts(productList));
     }
 
     private static void addProduct(TreeSet<Product> productList, String newProduct) {
@@ -55,18 +55,21 @@ public class Main {
         return sum;
     }
 
-    private static TreeSet<Product> getTopProducts(TreeSet<Product> productList) {
-        TreeSet<Product> countSortedProducts = new TreeSet<>(new ProductCountComparator());
+    private static Set<Product> getTopThreeProducts(SortedSet<Product> productList) {
+        SortedSet<Product> countSortedProducts = new TreeSet<>(new ProductCountComparator());
         countSortedProducts.addAll(productList);
 
-        TreeSet<Product> top3products = new TreeSet<>(new ProductCountComparator());
+        return countSortedProducts.stream().limit(3).collect(Collectors.toSet());
 
-        int i = 0;
-        for (Product p : countSortedProducts) {
-            if (i == 3) break;
-            top3products.add(p);
-            i++;
+//        return countSortedProducts.headSet(getProductAtIndex(countSortedProducts, 3));
+    }
+
+    private static Product getProductAtIndex(SortedSet<Product> products, int index) {
+        Product result = null;
+        Iterator<Product> iterator = products.iterator();
+        for (int i = 0; i <= index; i++) {
+            result = iterator.next();
         }
-        return top3products;
+        return result;
     }
 }
