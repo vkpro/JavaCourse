@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 public class Main {
     public static void main(String[] args) {
-        TreeMap<String, TreeMap<String, Integer>> clients = new TreeMap<String, TreeMap<String, Integer>>();
+        TreeMap<String, TreeMap<String, Integer>> clients = new TreeMap<>();
         Scanner sc = new Scanner(System.in);
 
         while (sc.hasNext()) {
@@ -28,12 +28,10 @@ public class Main {
         String productName = parts[1];
         Integer count = Integer.parseInt(parts[2]);
 
-        if (!clients.containsKey(name)) clients.put(name, new TreeMap<String, Integer>());
-        TreeMap<String, Integer> temp = clients.get(name);
+        TreeMap<String, Integer> temp = clients.computeIfAbsent(name, n -> new TreeMap<>());
 
-        if (!temp.containsKey(productName)) temp.put(productName, 0);
-        Integer oldCount = temp.get(productName);
-        temp.put(productName, oldCount + count);
+        temp.putIfAbsent(productName, 0);
+        temp.computeIfPresent(productName, (k, v) -> v + count);
     }
 
     private static void displayStatistic(TreeMap<String, TreeMap<String, Integer>> clients) {
