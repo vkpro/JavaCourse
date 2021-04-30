@@ -5,8 +5,12 @@ import ru.luxoft.cources.lab11dynamic.model.money.Money;
 import ru.luxoft.cources.lab11dynamic.model.score.CreditScore;
 import ru.luxoft.cources.lab11dynamic.model.score.CurrentScore;
 import ru.luxoft.cources.lab11dynamic.model.score.DebetScore;
+import ru.luxoft.cources.lab11dynamic.model.score.Score;
 
 import java.lang.annotation.Annotation;
+import java.util.EnumMap;
+
+import static ru.luxoft.cources.lab11dynamic.model.ScoreTypeEnum.*;
 
 public class ATM {
     private CurrentScore currentScore;
@@ -16,6 +20,7 @@ public class ATM {
     private int operLimit;
     private int currentOpers;
     private boolean operLimitToggl;
+    private EnumMap<ScoreTypeEnum, Score> scoresMap = new EnumMap<>(ScoreTypeEnum.class);
 
     public ATM() {
         this.creditScore =
@@ -29,9 +34,12 @@ public class ATM {
                 new CurrentScore(
                         new Money(CurrencyHolder.getCurrencyByName("RUR"), 1000.0d), null, 1);
 
-        Class thisClass = this.getClass();
+        scoresMap.put(CREDIT, creditScore);
+        scoresMap.put(DEBET, debetScore);
+        scoresMap.put(CURRENT, currentScore);
+
         for (Annotation annotation :
-                thisClass.getAnnotations()) {
+                ATM.class.getAnnotations()) {
             if (annotation instanceof OperationLimitATM) {
                 this.operLimit = ((OperationLimitATM) annotation).limit();
                 this.operLimitToggl = true;
@@ -45,11 +53,7 @@ public class ATM {
             return;
         }
 
-        switch (choice) {
-            case CREDIT -> this.creditScore.addMoney(money);
-            case DEBET -> this.debetScore.addMoney(money);
-            case CURRENT -> this.currentScore.addMoney(money);
-        }
+        scoresMap.get(choice).addMoney(money);
         currentOpers++;
     }
 
@@ -59,12 +63,7 @@ public class ATM {
             return null;
         }
         currentOpers++;
-        return switch (choice) {
-            case CREDIT -> this.creditScore.getMoney(money.getValue());
-            case DEBET -> this.debetScore.getMoney(money.getValue());
-            case CURRENT -> this.currentScore.getMoney(money.getValue());
-        };
-
+        return scoresMap.get(choice).getMoney(money.getValue());
     }
 
     public CurrentScore getCurrentScore() {
