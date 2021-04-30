@@ -20,7 +20,7 @@ public class ATM {
     private int operLimit;
     private int currentOpers;
     private boolean operLimitToggl;
-    private EnumMap<ScoreTypeEnum, Score> scoresMap = new EnumMap<>(ScoreTypeEnum.class);
+    private final EnumMap<ScoreTypeEnum, Score> scoresMap = new EnumMap<>(ScoreTypeEnum.class);
 
     public ATM() {
         this.creditScore =

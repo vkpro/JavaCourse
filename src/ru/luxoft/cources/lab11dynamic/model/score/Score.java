@@ -17,8 +17,8 @@ public abstract class Score implements MoneyInterface {
     private Account owner;
     private Integer number;
 
-    private Map<String, Integer> methodConstraintMap;
-    private Map<String, Integer> methodCallMap;
+    private final  Map<String, Integer> methodConstraintMap;
+    private final Map<String, Integer> methodCallMap;
 
 
     protected Score(Money balance, Account owner, Integer number) {
